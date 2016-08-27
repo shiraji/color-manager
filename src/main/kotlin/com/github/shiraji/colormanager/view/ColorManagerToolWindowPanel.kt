@@ -7,9 +7,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
-import com.intellij.openapi.util.JDOMUtil
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.xml.XmlFile
+import com.intellij.psi.xml.XmlTag
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
@@ -27,13 +28,15 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         DefaultListModel<String>()
     }
 
+    val colorMap: MutableMap<String, XmlTag> = mutableMapOf()
+
     init {
         setContent(createContentPanel())
         setToolbar(createToolbarPanel())
     }
 
     private fun createContentPanel(): JComponent {
-        val colorMap = createColorMap()
+        initColorMap()
         colorMap.forEach {
             listModel.addElement(it.key)
         }
@@ -42,10 +45,12 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 colorMap[list?.model?.getElementAt(index)]?.let {
-                    if (it.length == 7) {
-                        background = Color.decode(it)
-                    } else if (it.length == 9) {
-                        background = Color(java.lang.Long.decode(it).toInt(), true)
+                    xmlTag ->
+                    val colorText = xmlTag.value.trimmedText
+                    if (colorText.length == 7) {
+                        background = Color.decode(colorText)
+                    } else if (colorText.length == 9) {
+                        background = Color(java.lang.Long.decode(colorText).toInt(), true)
                     }
                 }
                 foreground = Color.BLACK
@@ -90,24 +95,19 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     override fun dispose() {
     }
 
-    private fun createColorMap(): Map<String, String> {
-        val colorMap = mutableMapOf<String, String>()
+    private fun initColorMap() {
         FilenameIndex.getFilesByName(project, "colors.xml", GlobalSearchScope.projectScope(project)).forEach {
             colorFile ->
-            JDOMUtil.loadDocument(colorFile.text).rootElement.getChildren("color").forEach {
-                colorElement ->
-                colorElement.getAttribute("name").value?.let {
-                    colorMap.put("R.color.$it", colorElement.text)
-                }
+            (colorFile as? XmlFile)?.rootTag?.findSubTags("color")?.forEach {
+                colorMap.put("R.color.${it.getAttribute("name")?.value}", it)
             }
         }
-        return colorMap
     }
 
     inner class RefreshAction() : AnAction("Reload colors.xml", "Reload colors.xml", AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent?) {
             ApplicationManager.getApplication().runWriteAction {
-                val colorMap = createColorMap()
+                initColorMap()
                 listModel.removeAllElements()
                 colorMap.forEach {
                     listModel.addElement(it.key)
