@@ -22,17 +22,15 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
 
-class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(false, true), DataProvider, Disposable {
+class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(true, true), DataProvider, Disposable {
 
-    val listModel: DefaultListModel<String> by lazy {
-        DefaultListModel<String>()
-    }
+    val listModel: DefaultListModel<String> = DefaultListModel()
 
     val colorMap: MutableMap<String, XmlTag> = mutableMapOf()
 
     init {
-        setContent(createContentPanel())
         setToolbar(createToolbarPanel())
+        setContent(createContentPanel())
     }
 
     private fun createContentPanel(): JComponent {
@@ -85,10 +83,10 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         return ScrollPaneFactory.createScrollPane(list)
     }
 
-    private fun createToolbarPanel(): JPanel {
+    private fun createToolbarPanel(): JComponent {
         val group = DefaultActionGroup()
         group.add(RefreshAction())
-        val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorFinder", group, false)
+        val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorFinder", group, true)
         return JBUI.Panels.simplePanel(actionToolBar.component)
     }
 
@@ -107,8 +105,10 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     inner class RefreshAction() : AnAction("Reload colors.xml", "Reload colors.xml", AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent?) {
             ApplicationManager.getApplication().runWriteAction {
-                initColorMap()
                 listModel.removeAllElements()
+                colorMap.clear()
+
+                initColorMap()
                 colorMap.forEach {
                     listModel.addElement(it.key)
                 }
