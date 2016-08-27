@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/color-manager.iml" filepath="$PROJECT_DIR$/.idea/modules/color-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/color-manager_main.iml" filepath="$PROJECT_DIR$/.idea/modules/color-manager_main.iml" group="color-manager" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/color-manager_test.iml" filepath="$PROJECT_DIR$/.idea/modules/color-manager_test.iml" group="color-manager" />
+    </modules>
+  </component>
+</project>
