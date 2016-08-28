@@ -93,10 +93,10 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         return ScrollPaneFactory.createScrollPane(list)
     }
 
-    private fun createToolbarPanel(): JComponent {
+    private fun createToolbarPanel(): JComponent? {
         val group = DefaultActionGroup()
         group.add(RefreshAction())
-        val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorFinder", group, true)
+        val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
         return JBUI.Panels.simplePanel(actionToolBar.component)
     }
 
