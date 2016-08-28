@@ -7,6 +7,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
+import com.intellij.psi.impl.source.xml.XmlTagImpl
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.xml.XmlFile
@@ -73,8 +74,17 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                     }
                 }
 
+                val gotoMenu = JMenuItem("Go to $selectedColor").apply {
+                    addActionListener {
+                        colorMap[selectedColor]?.let {
+                            (it as? XmlTagImpl)?.navigate(true)
+                        }
+                    }
+                }
+
                 JPopupMenu().run {
                     add(copyMenu)
+                    add(gotoMenu)
                     show(e.component, e.x, e.y)
                 }
             }
