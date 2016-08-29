@@ -2,6 +2,24 @@
 
 The Intellij plugin that manages Android colors. It makes easy to browse colors.
 
+# How to use
+
+Open "Color Manager" tool window. You will see all colors listed
+
+![normal](website/images/normal.png)
+
+# Other functions
+
+Right click a color listed on the tool window
+
+![right_click](website/images/right_click.png)
+
+Now you can copy color name and move to the color declaration 
+
+# How to install?
+
+Use the IDE's plugin manager to install the latest version of the plugin.
+
 ```
 Copyright 2016 Yoshinori Isogai
 
