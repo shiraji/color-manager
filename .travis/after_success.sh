@@ -4,7 +4,7 @@
 # Adapted from http://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/
 
 # Change this
-REPO="travis-ci-config-test"
+REPO="color-manager"
 
 # Change if necessary
 USER="shiraji"
@@ -26,14 +26,23 @@ elif [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
 elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   # Check branch
   echo "TRAVIS_BRANCH: '$TRAVIS_BRANCH' BRANCH: '$BRANCH'"
+elif [ "$IDEA_VERSION" != "LATEST-EAP-SNAPSHOT" ]; then
+  # Check IDEA version
+  echo "IDEA_VERSION: '$IDEA_VERSION'"
 else
-  echo "Start releasing..."
-  git checkout master
-  git config user.name "Travis CI"
-  git config user.email "isogai.shiraji@gmail.com"
-  git tag `cat VERSION`
-  git push git@github.com:${USER}/${REPO}.git `cat VERSION`
-  git rm .travis/release
-  git commit -m "[skip ci] prepare next development"
-  git push git@github.com:${USER}/${REPO}.git $BRANCH
+  # Without snapshot
+  if [ -f .travis/release ]; then
+    echo "Start releasing..."
+    ./gradlew publishPlugin
+    git checkout master
+    git config user.name "Travis CI"
+    git config user.email "isogai.shiraji@gmail.com"
+    git tag `cat VERSION`
+    git push git@github.com:${USER}/${REPO}.git `cat VERSION`
+    git rm .travis/release
+    git commit -m "[skip ci] prepare next development"
+    git push git@github.com:${USER}/${REPO}.git $BRANCH
+  else
+    echo "No .travis/release file"
+  fi
 fi
