@@ -8,13 +8,19 @@ Open "Color Manager" tool window. You will see all colors listed
 
 ![normal](website/images/normal.png)
 
-# Other functions
+## Copy & Move to the color
 
 Right click a color listed on the tool window
 
 ![right_click](website/images/right_click.png)
 
-Now you can copy color name and move to the color declaration 
+Now you can copy color name and move to the color declaration
+
+## Search
+
+Just start typing after focusing tool window
+
+![search](website/images/search.png)
 
 # How to install?
 
