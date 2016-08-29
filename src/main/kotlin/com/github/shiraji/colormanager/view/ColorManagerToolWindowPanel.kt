@@ -1,17 +1,19 @@
 package com.github.shiraji.colormanager.view
 
+import com.github.shiraji.colormanager.data.ColorManagerColorTag
 import com.intellij.icons.AllIcons
+import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.*
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.source.xml.XmlTagImpl
-import com.intellij.psi.search.FilenameIndex
-import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.xml.XmlFile
-import com.intellij.psi.xml.XmlTag
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
@@ -27,7 +29,11 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     val listModel: DefaultListModel<String> = DefaultListModel()
 
-    val colorMap: MutableMap<String, XmlTag> = mutableMapOf()
+    val colorMap: MutableMap<String, ColorManagerColorTag> = mutableMapOf()
+
+    val FILETER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
+
+    var filterLibRes = true
 
     init {
         setToolbar(createToolbarPanel())
@@ -44,8 +50,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 colorMap[list?.model?.getElementAt(index)]?.let {
-                    xmlTag ->
-                    val colorText = xmlTag.value.trimmedText
+                    colorTag ->
+                    val colorText = colorTag.tag.value.trimmedText
                     if (colorText.length == 7) {
                         background = Color.decode(colorText)
                     } else if (colorText.length == 9) {
@@ -77,7 +83,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 val gotoMenu = JMenuItem("Go to $selectedColor").apply {
                     addActionListener {
                         colorMap[selectedColor]?.let {
-                            (it as? XmlTagImpl)?.navigate(true)
+                            (it.tag as? XmlTagImpl)?.navigate(true)
                         }
                     }
                 }
@@ -96,6 +102,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun createToolbarPanel(): JComponent? {
         val group = DefaultActionGroup()
         group.add(RefreshAction())
+        group.add(FileterAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
         return JBUI.Panels.simplePanel(actionToolBar.component)
     }
@@ -104,25 +111,50 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     }
 
     private fun initColorMap() {
-        FilenameIndex.getFilesByName(project, "colors.xml", GlobalSearchScope.projectScope(project)).forEach {
-            colorFile ->
-            (colorFile as? XmlFile)?.rootTag?.findSubTags("color")?.forEach {
-                colorMap.put("R.color.${it.getAttribute("name")?.value}", it)
+        val psiManager = PsiManager.getInstance(project)
+
+        FileTypeIndex.getFiles(XmlFileType.INSTANCE, ProjectScope.getProjectScope(project)).forEach {
+            addToColorMap(psiManager, it, true)
+        }
+
+        if (!filterLibRes) {
+            FileTypeIndex.getFiles(XmlFileType.INSTANCE, ProjectScope.getLibrariesScope(project)).forEach {
+                addToColorMap(psiManager, it, false)
             }
         }
     }
 
-    inner class RefreshAction() : AnAction("Reload colors.xml", "Reload colors.xml", AllIcons.Actions.Refresh) {
-        override fun actionPerformed(e: AnActionEvent?) {
-            ApplicationManager.getApplication().runWriteAction {
-                listModel.removeAllElements()
-                colorMap.clear()
+    private fun addToColorMap(psiManager: PsiManager, virtualFile: VirtualFile, isInProject: Boolean) {
+        if (FILETER_XML.contains(virtualFile.name)) return
+        val xmlFile = psiManager.findFile(virtualFile) as? XmlFile ?: return
+        xmlFile.rootTag?.findSubTags("color")?.forEach {
+            colorMap.put("R.color.${it.getAttribute("name")?.value}", ColorManagerColorTag(it, isInProject))
+        }
+    }
 
-                initColorMap()
-                colorMap.forEach {
-                    listModel.addElement(it.key)
-                }
-            }
+    private fun refreshListModel() {
+        listModel.removeAllElements()
+        colorMap.clear()
+
+        initColorMap()
+        colorMap.forEach {
+            listModel.addElement(it.key)
+        }
+    }
+
+    inner class RefreshAction() : AnAction("Reload colors", "Reload colors", AllIcons.Actions.Refresh) {
+        override fun actionPerformed(e: AnActionEvent?) {
+            refreshListModel()
+        }
+    }
+
+    inner class FileterAction() : ToggleAction("Filter library resource colors", "Filter library resource colors", AllIcons.General.Filter) {
+
+        override fun isSelected(e: AnActionEvent?) = filterLibRes
+
+        override fun setSelected(e: AnActionEvent?, state: Boolean) {
+            filterLibRes = state
+            refreshListModel()
         }
     }
 }
