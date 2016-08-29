@@ -8,7 +8,7 @@ REPO="color-manager"
 
 # Change if necessary
 USER="shiraji"
-JDK="oraclejdk7"
+JDK="oraclejdk8"
 BRANCH="master"
 
 # Not handling errors
@@ -40,6 +40,8 @@ else
     git tag `cat VERSION`
     git push git@github.com:${USER}/${REPO}.git `cat VERSION`
     git rm .travis/release
+    ./gradlew prepareForNextDevelopment
+    git add VERSION
     git commit -m "[skip ci] prepare next development"
     git push git@github.com:${USER}/${REPO}.git $BRANCH
   else
