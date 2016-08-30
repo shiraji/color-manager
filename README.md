@@ -22,6 +22,16 @@ Just start typing after focusing tool window
 
 ![search](website/images/search.png)
 
+## Show all colors
+
+As default, this plugin filter library's color because there are a lot.
+
+![filter](website/images/filter.png)
+
+You can un-filter those by clicking "Filter" icon (It takes a few second to show all colors)
+
+![no_filter](website/images/no_filter.png)
+
 # How to install?
 
 Use the IDE's plugin manager to install the latest version of the plugin.
