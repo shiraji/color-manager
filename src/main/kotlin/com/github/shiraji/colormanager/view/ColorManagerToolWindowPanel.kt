@@ -52,19 +52,46 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         }
         val list = JBList(listModel)
         list.cellRenderer = object : DefaultListCellRenderer() {
+            val colorTextList = mutableListOf<String>()
+
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                colorMap[list?.model?.getElementAt(index)]?.let {
-                    colorTag ->
-                    val colorText = colorTag.tag.value.trimmedText
-                    if (colorText.length == 7) {
-                        background = Color.decode(colorText)
-                    } else if (colorText.length == 9) {
-                        background = Color(java.lang.Long.decode(colorText).toInt(), true)
-                    }
+                val colorName = list?.model?.getElementAt(index)
+                if (colorName is String) {
+                    colorTextList.clear()
+                    setBackgroundColorFromKey(colorName)
                 }
                 foreground = Color.BLACK
                 return component
+            }
+
+            private fun setBackgroundColorFromKey(colorName: String) {
+                colorMap[colorName]?.let {
+                    colorTag ->
+                    val colorText = colorTag.tag.value.trimmedText
+                    if (colorTextList.contains(colorText)) {
+                        background = Color.WHITE
+                        return
+                    }
+                    colorTextList.add(colorText)
+                    if (colorText.startsWith("@android:color/")) {
+                        setBackgroundColorFromKey("R.color.${colorText.replace("@android:color/", "")}")
+                    } else if (colorText.startsWith("@color/")) {
+                        setBackgroundColorFromKey("R.color.${colorText.replace("@color/", "")}")
+                    } else if (colorText.startsWith("#")) {
+                        background = when (colorText.length) {
+                            4 -> {
+                                val newColorText = "#${colorText[1]}${colorText[1]}${colorText[2]}${colorText[2]}${colorText[3]}${colorText[3]}"
+                                Color.decode(newColorText)
+                            }
+                            7 -> Color.decode(colorText)
+                            9 -> Color(java.lang.Long.decode(colorText).toInt(), true)
+                            else -> background
+                        }
+                    } else {
+                        background = Color.WHITE
+                    }
+                }
             }
         }
         // Google recommended height!!!
