@@ -47,10 +47,15 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         }
         val list = JBList(listModel)
         list.cellRenderer = object : DefaultListCellRenderer() {
+            val colorTextList = mutableListOf<String>()
+
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 val colorName = list?.model?.getElementAt(index)
-                if (colorName is String) setBackgroundColorFromKey(colorName)
+                if (colorName is String) {
+                    colorTextList.clear()
+                    setBackgroundColorFromKey(colorName)
+                }
                 foreground = Color.BLACK
                 return component
             }
@@ -59,6 +64,11 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 colorMap[colorName]?.let {
                     colorTag ->
                     val colorText = colorTag.tag.value.trimmedText
+                    if (colorTextList.contains(colorText)) {
+                        background = Color.WHITE
+                        return
+                    }
+                    colorTextList.add(colorText)
                     if (colorText.startsWith("@android:color/")) {
                         setBackgroundColorFromKey("R.color.${colorText.replace("@android:color/", "")}")
                     } else if (colorText.startsWith("@color/")) {
