@@ -5,6 +5,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
@@ -17,10 +18,12 @@ import com.intellij.psi.xml.XmlFile
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
+import com.intellij.util.Alarm
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.TextTransferable
 import java.awt.Color
 import java.awt.Component
+import java.awt.Cursor
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
@@ -34,6 +37,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     val FILETER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
 
     var filterLibRes = true
+
+    private val alarm = Alarm(Alarm.ThreadToUse.SHARED_THREAD)
 
     init {
         setToolbar(createToolbarPanel())
@@ -133,18 +138,34 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     }
 
     private fun refreshListModel() {
-        listModel.removeAllElements()
-        colorMap.clear()
+        try {
+            setWaitCursor()
+            listModel.removeAllElements()
+            colorMap.clear()
 
-        initColorMap()
-        colorMap.forEach {
-            listModel.addElement(it.key)
+            initColorMap()
+            colorMap.forEach {
+                listModel.addElement(it.key)
+            }
+        } finally {
+            restoreCursor()
         }
+    }
+
+    private fun restoreCursor() {
+        alarm.cancelAllRequests()
+        cursor = Cursor.getDefaultCursor()
+    }
+
+    private fun setWaitCursor() {
+        alarm.addRequest({ cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) }, 100)
     }
 
     inner class RefreshAction() : AnAction("Reload colors", "Reload colors", AllIcons.Actions.Refresh) {
         override fun actionPerformed(e: AnActionEvent?) {
-            refreshListModel()
+            ApplicationManager.getApplication().invokeLater {
+                refreshListModel()
+            }
         }
     }
 
