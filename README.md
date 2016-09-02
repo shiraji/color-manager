@@ -22,6 +22,8 @@ Just start typing after focusing tool window
 
 ![search](website/images/search.png)
 
+You can also copy color name by cmd+c (or ctrl+c) after selecting color panel
+
 ## Show all colors
 
 As default, this plugin filter library's color because there are a lot.
