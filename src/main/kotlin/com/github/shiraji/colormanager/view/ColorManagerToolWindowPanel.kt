@@ -21,6 +21,7 @@ import com.intellij.psi.impl.source.xml.XmlTagImpl
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.xml.XmlFile
+import com.intellij.ui.ColorChooser
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
@@ -333,6 +334,12 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         override fun setSelected(e: AnActionEvent?, state: Boolean) {
             sortAsc = state
             reloadListModel()
+        }
+    }
+
+    inner class AddColor() : AnAction("Add new color", "Add new color", AllIcons.General.Add) {
+        override fun actionPerformed(e: AnActionEvent?) {
+            val color = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "caption", Color.BLACK, true) ?: return
         }
     }
 
