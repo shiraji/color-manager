@@ -344,6 +344,12 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     inner class AddColor() : AnAction("Add new color", "Add new color", AllIcons.General.Add) {
         override fun actionPerformed(e: AnActionEvent?) {
             val color = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "Choose Color", Color.BLACK, true) ?: return
+
+            val colorsFile = xmlFiles.singleOrNull {
+                it.name.endsWith("main/res/values/colors.xml")
+            }
+
+            ColorManagerAddColorDialog().isVisible = true
         }
     }
 
