@@ -34,6 +34,14 @@ You can un-filter those by clicking "Filter" icon (It takes a few second to show
 
 ![no_filter](website/images/no_filter.png)
 
+## Sort by color name
+
+You can sort by color name by clicking sort icon
+
+![no_sort](website/images/no_sort.png)
+
+![sort](website/images/sort.png)
+
 # How to install?
 
 Use the IDE's plugin manager to install the latest version of the plugin.
