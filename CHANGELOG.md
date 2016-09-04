@@ -1,3 +1,8 @@
+### [ver 1.0.3](https://github.com/shiraji/color-manager/releases/tag/1.0.3)
+
+* Support sorting #16
+* Change rendering #17 #20
+
 ### [ver 1.0.2](https://github.com/shiraji/color-manager/releases/tag/1.0.2)
 
 * Show loading #13
