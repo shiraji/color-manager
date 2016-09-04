@@ -43,6 +43,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     val colorMap: MutableMap<String, ColorManagerColorTag> = linkedMapOf()
 
+    val xmlFiles: MutableSet<XmlFile> = mutableSetOf()
+
     val FILTER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
 
     var filterLibRes = true
@@ -182,7 +184,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                         }, "Delete color", null)
                     }
                 }
-                
+
                 JPopupMenu().run {
                     add(copyMenu)
                     add(copyMenuForXml)
@@ -247,6 +249,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun createToolbarPanel(): JComponent? {
         val group = DefaultActionGroup()
         group.add(RefreshAction())
+        group.add(AddColor())
         group.add(FilterAction())
         group.add(SortAscAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
@@ -281,14 +284,15 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun refreshListModel() {
         try {
             setWaitCursor()
-            resetColorMap()
+            resetColorData()
             reloadListModel()
         } finally {
             restoreCursor()
         }
     }
 
-    private fun resetColorMap() {
+    private fun resetColorData() {
+        xmlFiles.clear()
         colorMap.clear()
         initColorMap()
     }
@@ -339,7 +343,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     inner class AddColor() : AnAction("Add new color", "Add new color", AllIcons.General.Add) {
         override fun actionPerformed(e: AnActionEvent?) {
-            val color = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "caption", Color.BLACK, true) ?: return
+            val color = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "Choose Color", Color.BLACK, true) ?: return
         }
     }
 
