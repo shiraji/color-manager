@@ -32,7 +32,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     val listModel: DefaultListModel<String> = DefaultListModel()
 
-    val colorMap: MutableMap<String, ColorManagerColorTag> = mutableMapOf()
+    val colorMap: MutableMap<String, ColorManagerColorTag> = linkedMapOf()
 
     val FILTER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
 
@@ -40,16 +40,15 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     private val alarm = Alarm(Alarm.ThreadToUse.SHARED_THREAD)
 
+    var sortAsc = false
+
     init {
         setToolbar(createToolbarPanel())
         setContent(createContentPanel())
     }
 
     private fun createContentPanel(): JComponent {
-        initColorMap()
-        colorMap.forEach {
-            listModel.addElement(it.key)
-        }
+        refreshListModel()
         val list = JBList(listModel)
         list.cellRenderer = object : DefaultListCellRenderer() {
             val colorTextList = mutableListOf<String>()
@@ -135,6 +134,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         val group = DefaultActionGroup()
         group.add(RefreshAction())
         group.add(FilterAction())
+        group.add(SortAscAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
         return JBUI.Panels.simplePanel(actionToolBar.component)
     }
@@ -167,15 +167,23 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun refreshListModel() {
         try {
             setWaitCursor()
-            listModel.removeAllElements()
-            colorMap.clear()
-
-            initColorMap()
-            colorMap.forEach {
-                listModel.addElement(it.key)
-            }
+            resetColorMap()
+            reloadListModel()
         } finally {
             restoreCursor()
+        }
+    }
+
+    private fun resetColorMap() {
+        colorMap.clear()
+        initColorMap()
+    }
+
+    private fun reloadListModel() {
+        listModel.removeAllElements()
+        val keys = if (sortAsc) colorMap.keys.sorted() else colorMap.keys
+        keys.forEach {
+            listModel.addElement(it)
         }
     }
 
@@ -205,4 +213,14 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
             refreshListModel()
         }
     }
+
+    inner class SortAscAction() : ToggleAction("Sort alphabetically", "Sort alphabetically", AllIcons.ObjectBrowser.Sorted) {
+        override fun isSelected(e: AnActionEvent?) = sortAsc
+
+        override fun setSelected(e: AnActionEvent?, state: Boolean) {
+            sortAsc = state
+            reloadListModel()
+        }
+    }
+
 }
