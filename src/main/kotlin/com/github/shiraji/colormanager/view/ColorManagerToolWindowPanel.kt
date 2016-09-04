@@ -34,7 +34,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     val colorMap: MutableMap<String, ColorManagerColorTag> = mutableMapOf()
 
-    val FILETER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
+    val FILTER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
 
     var filterLibRes = true
 
@@ -134,7 +134,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun createToolbarPanel(): JComponent? {
         val group = DefaultActionGroup()
         group.add(RefreshAction())
-        group.add(FileterAction())
+        group.add(FilterAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
         return JBUI.Panels.simplePanel(actionToolBar.component)
     }
@@ -157,7 +157,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     }
 
     private fun addToColorMap(psiManager: PsiManager, virtualFile: VirtualFile, isInProject: Boolean) {
-        if (FILETER_XML.contains(virtualFile.name)) return
+        if (FILTER_XML.contains(virtualFile.name)) return
         val xmlFile = psiManager.findFile(virtualFile) as? XmlFile ?: return
         xmlFile.rootTag?.findSubTags("color")?.forEach {
             colorMap.put("R.color.${it.getAttribute("name")?.value}", ColorManagerColorTag(it, isInProject))
@@ -196,7 +196,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         }
     }
 
-    inner class FileterAction() : ToggleAction("Filter library resource colors", "Filter library resource colors", AllIcons.General.Filter) {
+    inner class FilterAction() : ToggleAction("Filter library resource colors", "Filter library resource colors", AllIcons.General.Filter) {
 
         override fun isSelected(e: AnActionEvent?) = filterLibRes
 
