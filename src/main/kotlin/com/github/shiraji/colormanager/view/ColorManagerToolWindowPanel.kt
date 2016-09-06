@@ -115,10 +115,22 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         list.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
                 super.mouseClicked(e)
-                if (!SwingUtilities.isRightMouseButton(e)) return
-                if (list.isEmpty) return
                 e ?: return
+                if (list.isEmpty || listModel.isEmpty || colorMap.isEmpty()) return
 
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    handleRightClick(e)
+                } else if (SwingUtilities.isLeftMouseButton(e) && e.clickCount == 2) {
+                    handleDoubleClick()
+                }
+            }
+
+            private fun handleDoubleClick() {
+                val selectedColor = listModel.get(list.minSelectionIndex)
+                (colorMap[selectedColor]?.tag as? XmlTagImpl)?.navigate(true) ?: return
+            }
+
+            private fun handleRightClick(e: MouseEvent) {
                 val selectedColor = listModel.get(list.minSelectionIndex)
                 val copyMenu = JMenuItem("Copy $selectedColor").apply {
                     addActionListener {
