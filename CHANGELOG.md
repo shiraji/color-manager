@@ -1,3 +1,7 @@
+### [ver 1.0.4](https://github.com/shiraji/color-manager/releases/tag/1.0.4)
+
+* Support double click to navigate #26
+
 ### [ver 1.0.3](https://github.com/shiraji/color-manager/releases/tag/1.0.3)
 
 * Support sorting #16
