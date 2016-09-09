@@ -8,13 +8,21 @@ Open "Color Manager" tool window. You will see all colors listed
 
 ![normal](website/images/normal.png)
 
-## Copy & Move to the color
+## Copy
 
 Right click a color listed on the tool window
 
 ![right_click](website/images/right_click.png)
 
-Now you can copy color name and move to the color declaration
+Click "Copy R.color.whatever_color_name"
+
+You can also copy color name by cmd+c (or ctrl+c) after selecting color panel
+
+## Move to color
+
+Same as Copy. Right click and click "Go to R.color.whatever_color_name"
+
+Or just double click an item
 
 ## Search
 
@@ -22,7 +30,6 @@ Just start typing after focusing tool window
 
 ![search](website/images/search.png)
 
-You can also copy color name by cmd+c (or ctrl+c) after selecting color panel
 
 ## Show all colors
 
@@ -45,6 +52,8 @@ You can sort by color name by clicking sort icon
 # How to install?
 
 Use the IDE's plugin manager to install the latest version of the plugin.
+
+# LICENSE
 
 ```
 Copyright 2016 Yoshinori Isogai
