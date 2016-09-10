@@ -41,6 +41,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     private val alarm = Alarm(Alarm.ThreadToUse.SHARED_THREAD)
 
+    private val androidSdkPathRegex = Regex("platforms/android-\\d\\d*/data/res")
+
     var sortAsc = false
 
     init {
@@ -138,9 +140,18 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                     }
                 }
 
+                val colorInfo = colorMap[selectedColor] ?: return
+                val tag = colorInfo.tag
+                val nameForXml = "${getXmlColorPrefix(colorInfo.isInAndroidSdk)}/${tag.getAttribute("name")?.value}"
+                val copyMenuForXml = JMenuItem("Copy $nameForXml").apply {
+                    addActionListener {
+                        CopyPasteManager.getInstance().setContents(TextTransferable(nameForXml))
+                    }
+                }
+
                 val gotoMenu = JMenuItem("Go to $selectedColor").apply {
                     addActionListener {
-                        colorMap[selectedColor]?.let {
+                        colorInfo.let {
                             (it.tag as? XmlTagImpl)?.navigate(true)
                         }
                     }
@@ -148,6 +159,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
                 JPopupMenu().run {
                     add(copyMenu)
+                    add(copyMenuForXml)
                     add(gotoMenu)
                     show(e.component, e.x, e.y)
                 }
@@ -155,6 +167,10 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         })
 
         return ScrollPaneFactory.createScrollPane(list)
+    }
+
+    private fun getXmlColorPrefix(isInAndroidSdk: Boolean): String {
+        return if (isInAndroidSdk) "@android:color" else "@color"
     }
 
     private fun createToolbarPanel(): JComponent? {
@@ -173,21 +189,21 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         val psiManager = PsiManager.getInstance(project)
 
         FileTypeIndex.getFiles(XmlFileType.INSTANCE, ProjectScope.getProjectScope(project)).forEach {
-            addToColorMap(psiManager, it, true)
+            addToColorMap(psiManager, it, true, false)
         }
 
         if (!filterLibRes) {
             FileTypeIndex.getFiles(XmlFileType.INSTANCE, ProjectScope.getLibrariesScope(project)).forEach {
-                addToColorMap(psiManager, it, false)
+                addToColorMap(psiManager, it, isInProject = false, isInAndroidSdk = it.path.contains(androidSdkPathRegex))
             }
         }
     }
 
-    private fun addToColorMap(psiManager: PsiManager, virtualFile: VirtualFile, isInProject: Boolean) {
+    private fun addToColorMap(psiManager: PsiManager, virtualFile: VirtualFile, isInProject: Boolean, isInAndroidSdk: Boolean) {
         if (FILTER_XML.contains(virtualFile.name)) return
         val xmlFile = psiManager.findFile(virtualFile) as? XmlFile ?: return
         xmlFile.rootTag?.findSubTags("color")?.forEach {
-            colorMap.put("R.color.${it.getAttribute("name")?.value}", ColorManagerColorTag(it, isInProject, virtualFile.name))
+            colorMap.put("R.color.${it.getAttribute("name")?.value}", ColorManagerColorTag(it, virtualFile.name, isInProject = isInProject, isInAndroidSdk = isInAndroidSdk))
         }
     }
 
