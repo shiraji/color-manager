@@ -1,3 +1,7 @@
+### [ver 1.0.5](https://github.com/shiraji/color-manager/releases/tag/1.0.5)
+
+* Add copy as "@color/white" #29
+
 ### [ver 1.0.4](https://github.com/shiraji/color-manager/releases/tag/1.0.4)
 
 * Support double click to navigate #26
