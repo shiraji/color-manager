@@ -1,3 +1,7 @@
+### [ver 1.1.0](https://github.com/shiraji/color-manager/releases/tag/1.1.0)
+
+* Support Drag and Drop #11
+
 ### [ver 1.0.5](https://github.com/shiraji/color-manager/releases/tag/1.0.5)
 
 * Add copy as "@color/white" #29
