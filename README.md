@@ -65,6 +65,8 @@ If the selected file is xml, then the drop text format is `@color/color_name`
 
 ![dndxml](website/images/dndxml.gif)
 
+At this moment, there is no way to detect drop target file's type. So, if you select a xml file and drop text to a Java file, this plugin pastes `@color/color_name` not `R.color.color_name`
+
 # How to install?
 
 Use the IDE's plugin manager to install the latest version of the plugin.
