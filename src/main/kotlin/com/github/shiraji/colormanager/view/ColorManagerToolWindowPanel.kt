@@ -2,10 +2,15 @@ package com.github.shiraji.colormanager.view
 
 import com.github.shiraji.colormanager.data.ColorManagerColorTag
 import com.intellij.icons.AllIcons
+import com.intellij.ide.dnd.DnDDragStartBean
+import com.intellij.ide.dnd.DnDImage
+import com.intellij.ide.dnd.DnDSupport
 import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
@@ -21,12 +26,13 @@ import com.intellij.ui.components.JBList
 import com.intellij.util.Alarm
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.TextTransferable
+import com.intellij.util.ui.UIUtil
 import sun.swing.DefaultLookup
-import java.awt.Color
-import java.awt.Component
-import java.awt.Cursor
+import java.awt.*
+import java.awt.datatransfer.StringSelection
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.awt.image.BufferedImage
 import javax.swing.*
 
 class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(true, true), DataProvider, Disposable {
@@ -166,7 +172,51 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
             }
         })
 
+        installDnDAction(list)
         return ScrollPaneFactory.createScrollPane(list)
+    }
+
+    private fun installDnDAction(list: JBList) {
+        DnDSupport.createBuilder(list).setBeanProvider { info ->
+            val file = getSelectedFile() ?: return@setBeanProvider null
+            if (info.isMove) {
+                if (file.fileType == XmlFileType.INSTANCE) {
+                    DnDDragStartBean(StringSelection(getNameForXml(list)))
+                } else {
+                    DnDDragStartBean(StringSelection(listModel.get(list.minSelectionIndex)))
+                }
+            } else {
+                null
+            }
+        }.setImageProvider {
+            val file = getSelectedFile() ?: return@setImageProvider null
+            val label =
+                    if (file.fileType == XmlFileType.INSTANCE) {
+                        JLabel(getNameForXml(list))
+                    } else {
+                        JLabel(listModel.get(list.minSelectionIndex))
+                    }
+            label.isOpaque = true
+            label.size = label.preferredSize
+            val image = UIUtil.createImage(label.width, label.height, BufferedImage.TYPE_INT_ARGB)
+            val g2 = image.graphics as Graphics2D
+            g2.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f)
+            label.paint(g2)
+            g2.dispose()
+            DnDImage(image, Point(-image.getWidth(null), -image.getHeight(null)))
+        }.setDisposableParent(this).install()
+    }
+
+    private fun getNameForXml(list: JBList): String? {
+        val selectedColor = listModel.get(list.minSelectionIndex)
+        val colorInfo = colorMap[selectedColor] ?: return null
+        val tag = colorInfo.tag
+        return "${getXmlColorPrefix(colorInfo.isInAndroidSdk)}/${tag.getAttribute("name")?.value}"
+    }
+
+    private fun getSelectedFile(): VirtualFile? {
+        val editor = FileEditorManager.getInstance(project).selectedTextEditor ?: return null
+        return FileDocumentManager.getInstance().getFile(editor.document)
     }
 
     private fun getXmlColorPrefix(isInAndroidSdk: Boolean): String {
