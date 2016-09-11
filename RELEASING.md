@@ -12,5 +12,5 @@
     </change-notes>
 ```
 * Commit & push changes
+* Check [travis ci](https://travis-ci.org/shiraji/color-manager) to successfully release the module
 * Create Release Tag (Upload archive file as well)
-* Check [travis ci](https://travis-ci.org/shiraji/intellij-plugin-with-gradle-wizard) to successfully release the module
