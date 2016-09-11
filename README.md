@@ -49,6 +49,22 @@ You can sort by color name by clicking sort icon
 
 ![sort](website/images/sort.png)
 
+## Drag and Drop
+
+From v1.1.0, this plugin support drag and drop feature.
+
+* Select a file where you want to drop
+* Drag the color panel
+* Drop where you want to copy the color name/tag
+
+If the selected file is not xml file, then the drop text format is `R.color.color_name`
+
+![dnd](website/images/dnd.gif)
+
+If the selected file is xml, then the drop text format is `@color/color_name`
+
+![dndxml](website/images/dndxml.gif)
+
 # How to install?
 
 Use the IDE's plugin manager to install the latest version of the plugin.
