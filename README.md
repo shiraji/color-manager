@@ -14,15 +14,21 @@ Right click a color listed on the tool window
 
 ![right_click](website/images/right_click.png)
 
-Click "Copy R.color.whatever_color_name"
+Click "Copy R.color.whatever_color_name" or "Copy @color/whatever_color_name"
 
-You can also copy color name by cmd+c (or ctrl+c) after selecting color panel
+You can also copy color name ("R.color.whatever_color_name" style) by cmd+c (or ctrl+c) after selecting the color panel
 
-## Move to color
+## Move to the color definition
 
 Same as Copy. Right click and click "Go to R.color.whatever_color_name"
 
 Or just double click an item
+
+## Delete a color
+
+Same as Copy and move. Right click and click "Delete R.color.whatever_color_name"
+
+It will show confirmation dialog before deleting the color tag. 
 
 ## Search
 
