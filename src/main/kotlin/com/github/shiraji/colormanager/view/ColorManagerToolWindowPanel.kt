@@ -186,7 +186,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                     add(copyMenu)
                     add(copyMenuForXml)
                     add(gotoMenu)
-                    add(deleteMenu)
+                    if (colorInfo.isInProject) add(deleteMenu)
                     show(e.component, e.x, e.y)
                 }
             }
