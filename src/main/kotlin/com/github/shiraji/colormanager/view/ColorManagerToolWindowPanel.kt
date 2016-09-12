@@ -166,6 +166,13 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
                 val deleteMenu = JMenuItem("Delete $selectedColor").apply {
                     addActionListener {
+                        val result = JOptionPane.showConfirmDialog(this@ColorManagerToolWindowPanel,
+                                "Delete $selectedColor?",
+                                "Delete Confirmation",
+                                JOptionPane.OK_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE)
+                        if (result != JOptionPane.YES_OPTION) return@addActionListener
+
                         CommandProcessor.getInstance().executeCommand(project, {
                             ApplicationManager.getApplication().runWriteAction {
                                 colorInfo.tag.delete()
@@ -174,7 +181,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                         }, "Delete color", null)
                     }
                 }
-
+                
                 JPopupMenu().run {
                     add(copyMenu)
                     add(copyMenuForXml)
