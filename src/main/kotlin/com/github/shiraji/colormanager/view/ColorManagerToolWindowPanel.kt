@@ -9,6 +9,7 @@ import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.ide.CopyPasteManager
@@ -163,10 +164,29 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                     }
                 }
 
+                val deleteMenu = JMenuItem("Delete $selectedColor").apply {
+                    addActionListener {
+                        val result = JOptionPane.showConfirmDialog(this@ColorManagerToolWindowPanel,
+                                "Delete $selectedColor?",
+                                "Delete Confirmation",
+                                JOptionPane.OK_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE)
+                        if (result != JOptionPane.YES_OPTION) return@addActionListener
+
+                        CommandProcessor.getInstance().executeCommand(project, {
+                            ApplicationManager.getApplication().runWriteAction {
+                                colorInfo.tag.delete()
+                                refreshListModel()
+                            }
+                        }, "Delete color", null)
+                    }
+                }
+                
                 JPopupMenu().run {
                     add(copyMenu)
                     add(copyMenuForXml)
                     add(gotoMenu)
+                    if (colorInfo.isInProject) add(deleteMenu)
                     show(e.component, e.x, e.y)
                 }
             }
