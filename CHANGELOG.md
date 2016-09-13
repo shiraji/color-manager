@@ -1,3 +1,7 @@
+### [ver 1.1.1](https://github.com/shiraji/color-manager/releases/tag/1.1.1)
+
+* Support deleting color #6
+
 ### [ver 1.1.0](https://github.com/shiraji/color-manager/releases/tag/1.1.0)
 
 * Support Drag and Drop #11
