@@ -21,6 +21,7 @@ import com.intellij.psi.impl.source.xml.XmlTagImpl
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.xml.XmlFile
+import com.intellij.ui.ColorChooser
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
@@ -41,6 +42,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     val listModel: DefaultListModel<String> = DefaultListModel()
 
     val colorMap: MutableMap<String, ColorManagerColorTag> = linkedMapOf()
+
+    val xmlFiles: MutableSet<XmlFile> = mutableSetOf()
 
     val FILTER_XML = listOf("AndroidManifest.xml", "strings.xml", "dimens.xml", "base_strings.xml", "pom.xml", "donottranslate-cldr.xml", "donottranslate-maps.xml", "common_strings.xml")
 
@@ -181,7 +184,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                         }, "Delete color", null)
                     }
                 }
-                
+
                 JPopupMenu().run {
                     add(copyMenu)
                     add(copyMenuForXml)
@@ -246,6 +249,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun createToolbarPanel(): JComponent? {
         val group = DefaultActionGroup()
         group.add(RefreshAction())
+        group.add(AddColor())
         group.add(FilterAction())
         group.add(SortAscAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
@@ -280,14 +284,15 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     private fun refreshListModel() {
         try {
             setWaitCursor()
-            resetColorMap()
+            resetColorData()
             reloadListModel()
         } finally {
             restoreCursor()
         }
     }
 
-    private fun resetColorMap() {
+    private fun resetColorData() {
+        xmlFiles.clear()
         colorMap.clear()
         initColorMap()
     }
@@ -333,6 +338,18 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         override fun setSelected(e: AnActionEvent?, state: Boolean) {
             sortAsc = state
             reloadListModel()
+        }
+    }
+
+    inner class AddColor() : AnAction("Add new color", "Add new color", AllIcons.General.Add) {
+        override fun actionPerformed(e: AnActionEvent?) {
+            val color = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "Choose Color", Color.BLACK, true) ?: return
+
+            val colorsFile = xmlFiles.singleOrNull {
+                it.name.endsWith("main/res/values/colors.xml")
+            }
+
+            ColorManagerAddColorDialog().isVisible = true
         }
     }
 
