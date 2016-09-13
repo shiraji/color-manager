@@ -1,4 +1,4 @@
-<idea-plugin version="2">
+<idea-plugin version="2" url="https://plugins.jetbrains.com/plugin/8583">
     <id>com.github.shiraji.colormanager</id>
     <name>Android Color Manager</name>
     <version>1.0.1</version>
