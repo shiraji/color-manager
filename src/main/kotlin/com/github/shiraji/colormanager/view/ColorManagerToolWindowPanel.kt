@@ -21,6 +21,7 @@ import com.intellij.psi.impl.source.xml.XmlTagImpl
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.xml.XmlFile
+import com.intellij.ui.ColorChooser
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
@@ -61,60 +62,43 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         refreshListModel()
         val list = JBList(listModel)
         list.cellRenderer = object : DefaultListCellRenderer() {
-            val colorTextList = mutableListOf<String>()
-
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val cell = ColorManagerToolWindowCell()
-                val colorName = list?.model?.getElementAt(index) as String
-                cell.colorNameLabel.text = colorName.toString()
-                colorTextList.clear()
-                setBackgroundColorFromKey(cell, colorName)
-                colorMap[colorName]?.let {
-                    val fileName = it.fileName
-                    cell.fileNameLabel.text = if (it.isInProject) fileName else "$fileName (in library)"
-                }
+                val colorName = list?.model?.getElementAt(index) as? String ?: return cell.rootPanel
+                cell.colorNameLabel.text = colorName
+                setColor(cell, colorName)
                 cell.rootPanel.border =
                         if (cellHasFocus || isSelected)
                             DefaultLookup.getBorder(this, ui, "List.focusSelectedCellHighlightBorder") ?: DefaultLookup.getBorder(this, ui, "List.focusCellHighlightBorder")
                         else
                             DefaultLookup.getBorder(this, ui, "List.cellNoFocusBorder")
-
                 return cell.rootPanel
             }
 
-            private fun setBackgroundColorFromKey(cell: ColorManagerToolWindowCell, colorName: String) {
-                val colorTag = colorMap[colorName]
-                if (colorTag == null) {
-                    cell.rootPanel.background = Color.WHITE
+            private fun setColor(cell: ColorManagerToolWindowCell, colorName: String) {
+                val colorManagerColorTag = colorMap[colorName]
+                if (colorManagerColorTag == null) {
                     cell.colorCodeLabel.text = "$colorName not found"
-                } else {
-                    val colorText = colorTag.tag.value.trimmedText
-                    if (colorTextList.contains(colorText)) {
-                        cell.rootPanel.background = Color.WHITE
-                        cell.colorCodeLabel.text = "$colorText not found"
-                        return
-                    }
-                    colorTextList.add(colorText)
-                    if (colorText.startsWith("@android:color/")) {
-                        setBackgroundColorFromKey(cell, "R.color.${colorText.replace("@android:color/", "")}")
-                    } else if (colorText.startsWith("@color/")) {
-                        setBackgroundColorFromKey(cell, "R.color.${colorText.replace("@color/", "")}")
-                    } else if (colorText.startsWith("#")) {
-                        cell.rootPanel.background = when (colorText.length) {
-                            4 -> {
-                                val newColorText = "#${colorText[1]}${colorText[1]}${colorText[2]}${colorText[2]}${colorText[3]}${colorText[3]}"
-                                Color.decode(newColorText)
-                            }
-                            7 -> Color.decode(colorText)
-                            9 -> Color(java.lang.Long.decode(colorText).toInt(), true)
-                            else -> cell.rootPanel.background
-                        }
-                        cell.colorCodeLabel.text = colorText
-                    } else {
-                        cell.rootPanel.background = Color.WHITE
-                        cell.colorCodeLabel.text = "Not Found"
-                    }
+                    return
                 }
+                setFileName(cell, colorManagerColorTag)
+                setBackgroundAndColorCode(cell, colorManagerColorTag)
+            }
+
+            private fun setBackgroundAndColorCode(cell: ColorManagerToolWindowCell, colorManagerColorTag: ColorManagerColorTag) {
+                val backgroundColor = colorManagerColorTag.color
+                if (backgroundColor == null) {
+                    cell.rootPanel.background = Color.WHITE
+                    cell.colorCodeLabel.text = colorManagerColorTag.errorMessage ?: "'${colorManagerColorTag.tag.value.trimmedText}' not found"
+                } else {
+                    cell.rootPanel.background = backgroundColor
+                    cell.colorCodeLabel.text = colorManagerColorTag.colorCode ?: "???"
+                }
+            }
+
+            private fun setFileName(cell: ColorManagerToolWindowCell, colorManagerColorTag: ColorManagerColorTag) {
+                val fileName = colorManagerColorTag.fileName
+                cell.fileNameLabel.text = if (colorManagerColorTag.isInProject) fileName else "$fileName (in library)"
             }
         }
         // Google recommended height!!!
@@ -181,12 +165,32 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                         }, "Delete color", null)
                     }
                 }
-                
+
+                val editMenu = JMenuItem("Edit $selectedColor").apply {
+                    addActionListener {
+                        val newColor = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "Edit Color", colorInfo.color, true) ?: return@addActionListener
+                        CommandProcessor.getInstance().executeCommand(project, {
+                            ApplicationManager.getApplication().runWriteAction {
+                                val alpha = newColor.alpha
+                                val colorCode = if (alpha != 255)
+                                    "#%02X%02X%02X%02X".format(alpha, newColor.red, newColor.green, newColor.blue)
+                                else
+                                    "#%02X%02X%02X".format(newColor.red, newColor.green, newColor.blue)
+                                colorInfo.tag.value.text = colorCode
+                            }
+                            refreshListModel()
+                        }, "Edit color", null)
+                    }
+                }
+
                 JPopupMenu().run {
                     add(copyMenu)
                     add(copyMenuForXml)
                     add(gotoMenu)
-                    if (colorInfo.isInProject) add(deleteMenu)
+                    if (colorInfo.isInProject) {
+                        add(editMenu)
+                        add(deleteMenu)
+                    }
                     show(e.component, e.x, e.y)
                 }
             }
@@ -267,13 +271,57 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 addToColorMap(psiManager, it, isInProject = false, isInAndroidSdk = it.path.contains(androidSdkPathRegex))
             }
         }
+
+        generateColors()
+    }
+
+    private fun generateColors() {
+        val colorTextList = mutableListOf<String>()
+        colorMap.keys.forEach {
+            colorTextList.clear()
+            val colorTag = colorMap[it] ?: return@forEach
+            generateColorFromKey(colorTextList, colorTag, it)
+        }
+    }
+
+    private fun generateColorFromKey(colorTextList: MutableList<String>, target: ColorManagerColorTag, colorName: String) {
+        val colorTag = colorMap[colorName] ?: return
+        val colorText = colorTag.tag.value.trimmedText
+        if (colorTextList.contains(colorText)) {
+            target.errorMessage = "Loop detected..."
+            return
+        }
+        colorTextList.add(colorText)
+        if (colorText.startsWith("@android:color/")) {
+            generateColorFromKey(colorTextList, target, "R.color.${colorText.replace("@android:color/", "")}")
+        } else if (colorText.startsWith("@color/")) {
+            generateColorFromKey(colorTextList, target, "R.color.${colorText.replace("@color/", "")}")
+        } else if (colorText.startsWith("#")) {
+            target.colorCode = colorText
+            target.color = when (colorText.length) {
+                4 -> Color.decode("#${colorText[1]}${colorText[1]}${colorText[2]}${colorText[2]}${colorText[3]}${colorText[3]}")
+                7 -> Color.decode(colorText)
+                9 -> Color(java.lang.Long.decode(colorText).toInt(), true)
+                else -> {
+                    target.errorMessage = "Invalid color code: $colorText"
+                    null
+                }
+            }
+        } else {
+            target.errorMessage = "Invalid format: $colorText"
+        }
     }
 
     private fun addToColorMap(psiManager: PsiManager, virtualFile: VirtualFile, isInProject: Boolean, isInAndroidSdk: Boolean) {
         if (FILTER_XML.contains(virtualFile.name)) return
         val xmlFile = psiManager.findFile(virtualFile) as? XmlFile ?: return
         xmlFile.rootTag?.findSubTags("color")?.forEach {
-            colorMap.put("R.color.${it.getAttribute("name")?.value}", ColorManagerColorTag(it, virtualFile.name, isInProject = isInProject, isInAndroidSdk = isInAndroidSdk))
+            colorMap.put("R.color.${it.getAttribute("name")?.value}",
+                    ColorManagerColorTag(
+                            tag = it,
+                            fileName = virtualFile.name,
+                            isInProject = isInProject,
+                            isInAndroidSdk = isInAndroidSdk))
         }
     }
 
@@ -335,5 +383,4 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
             reloadListModel()
         }
     }
-
 }
