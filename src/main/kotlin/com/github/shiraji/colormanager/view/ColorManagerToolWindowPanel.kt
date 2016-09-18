@@ -21,6 +21,7 @@ import com.intellij.psi.impl.source.xml.XmlTagImpl
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.xml.XmlFile
+import com.intellij.ui.ColorChooser
 import com.intellij.ui.ListSpeedSearch
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.components.JBList
@@ -164,12 +165,32 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                         }, "Delete color", null)
                     }
                 }
-                
+
+                val editMenu = JMenuItem("Edit $selectedColor").apply {
+                    addActionListener {
+                        val newColor = ColorChooser.chooseColor(this@ColorManagerToolWindowPanel, "Edit Color", colorInfo.color, true) ?: return@addActionListener
+                        CommandProcessor.getInstance().executeCommand(project, {
+                            ApplicationManager.getApplication().runWriteAction {
+                                val alpha = newColor.alpha
+                                val colorCode = if (alpha != 255)
+                                    "#%02X%02X%02X%02X".format(alpha, newColor.red, newColor.green, newColor.blue)
+                                else
+                                    "#%02X%02X%02X".format(newColor.red, newColor.green, newColor.blue)
+                                colorInfo.tag.value.text = colorCode
+                            }
+                            refreshListModel()
+                        }, "Edit color", null)
+                    }
+                }
+
                 JPopupMenu().run {
                     add(copyMenu)
                     add(copyMenuForXml)
                     add(gotoMenu)
-                    if (colorInfo.isInProject) add(deleteMenu)
+                    if (colorInfo.isInProject) {
+                        add(editMenu)
+                        add(deleteMenu)
+                    }
                     show(e.component, e.x, e.y)
                 }
             }
