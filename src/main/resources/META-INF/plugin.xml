@@ -9,9 +9,9 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        <p>1.1.1</p>
+        <p>1.1.2</p>
         <ul>
-          <li>Support deleting color #6</li>
+          <li>Support editing color #2 #34</li>
         </ul>
         <p>Older version changes are listed on <a href="https://github.com/shiraji/color-manager/blob/master/CHANGELOG.md">CHANGELOG.md</a></p>
     ]]>

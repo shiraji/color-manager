@@ -1,3 +1,7 @@
+### [ver 1.1.1](https://github.com/shiraji/color-manager/releases/tag/1.1.2)
+
+* Support editing color code #2 #34
+
 ### [ver 1.1.1](https://github.com/shiraji/color-manager/releases/tag/1.1.1)
 
 * Support deleting color #6
