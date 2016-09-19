@@ -1,4 +1,8 @@
-### [ver 1.1.1](https://github.com/shiraji/color-manager/releases/tag/1.1.2)
+### [ver 1.1.3](https://github.com/shiraji/color-manager/releases/tag/1.1.3)
+
+* Fix java.lang.ArrayIndexOutOfBoundsException: -1 #38
+
+### [ver 1.1.2](https://github.com/shiraji/color-manager/releases/tag/1.1.2)
 
 * Support editing color code #2 #34
 
