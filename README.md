@@ -24,6 +24,12 @@ Same as Copy. Right click and click "Go to R.color.whatever_color_name"
 
 Or just double click an item
 
+## Edit the color code
+
+Click "Edit R.color.whatever_color_name" and choose new color
+
+![edit](website/images/edit.gif)
+
 ## Delete a color
 
 Same as Copy and move. Right click and click "Delete R.color.whatever_color_name"
