@@ -8,6 +8,24 @@ Open "Color Manager" tool window. You will see all colors listed
 
 ![normal](website/images/normal.png)
 
+## Drag and Drop
+
+From v1.1.0, this plugin support drag and drop feature.
+
+* Select a file where you want to drop
+* Drag the color panel
+* Drop where you want to copy the color name/tag
+
+If the selected file is not xml file, then the drop text format is `R.color.color_name`
+
+![dnd](website/images/dnd.gif)
+
+If the selected file is xml, then the drop text format is `@color/color_name`
+
+![dndxml](website/images/dndxml.gif)
+
+At this moment, there is no way to detect drop target file's type. So, if you select a xml file and drop text to a Java file, this plugin pastes `@color/color_name` not `R.color.color_name`
+
 ## Copy
 
 Right click a color listed on the tool window
@@ -34,7 +52,7 @@ Click "Edit R.color.whatever_color_name" and choose new color
 
 Same as Copy and move. Right click and click "Delete R.color.whatever_color_name"
 
-It will show confirmation dialog before deleting the color tag. 
+It will show confirmation dialog before deleting the color tag.
 
 ## Search
 
@@ -60,24 +78,6 @@ You can sort by color name by clicking sort icon
 ![no_sort](website/images/no_sort.png)
 
 ![sort](website/images/sort.png)
-
-## Drag and Drop
-
-From v1.1.0, this plugin support drag and drop feature.
-
-* Select a file where you want to drop
-* Drag the color panel
-* Drop where you want to copy the color name/tag
-
-If the selected file is not xml file, then the drop text format is `R.color.color_name`
-
-![dnd](website/images/dnd.gif)
-
-If the selected file is xml, then the drop text format is `@color/color_name`
-
-![dndxml](website/images/dndxml.gif)
-
-At this moment, there is no way to detect drop target file's type. So, if you select a xml file and drop text to a Java file, this plugin pastes `@color/color_name` not `R.color.color_name`
 
 # How to install?
 
