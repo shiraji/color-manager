@@ -111,6 +111,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 e ?: return
                 if (list.isEmpty || listModel.isEmpty || colorMap.isEmpty()) return
 
+                if (list.minSelectionIndex < 0 || listModel.size() < list.minSelectionIndex) return
+
                 if (SwingUtilities.isRightMouseButton(e)) {
                     handleRightClick(e)
                 } else if (SwingUtilities.isLeftMouseButton(e) && e.clickCount == 2) {
@@ -202,6 +204,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
 
     private fun installDnDAction(list: JBList) {
         DnDSupport.createBuilder(list).setBeanProvider { info ->
+            if (list.minSelectionIndex < 0 || listModel.size() < list.minSelectionIndex) return@setBeanProvider null
             val file = getSelectedFile() ?: return@setBeanProvider null
             if (info.isMove) {
                 if (file.fileType == XmlFileType.INSTANCE) {
@@ -213,6 +216,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 null
             }
         }.setImageProvider {
+            if (list.minSelectionIndex < 0 || listModel.size() < list.minSelectionIndex) return@setImageProvider null
             val file = getSelectedFile() ?: return@setImageProvider null
             val label =
                     if (file.fileType == XmlFileType.INSTANCE) {
