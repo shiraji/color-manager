@@ -257,7 +257,10 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         group.add(FilterAction())
         group.add(SortAscAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
-        return JBUI.Panels.simplePanel(actionToolBar.component)
+        val simplePanel = JBUI.Panels.simplePanel(actionToolBar.component)
+        val toolBar = ColorManagerToolBar()
+        toolBar.buttonPanel = simplePanel
+        return toolBar.rootPanel
     }
 
     override fun dispose() {
