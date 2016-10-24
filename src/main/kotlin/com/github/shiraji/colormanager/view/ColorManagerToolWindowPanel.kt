@@ -199,7 +199,10 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         })
 
         installDnDAction(list)
-        return ScrollPaneFactory.createScrollPane(list)
+        val scrollPane = ScrollPaneFactory.createScrollPane(list)
+        val layout = ColorManagerToolWindowLayout()
+        layout.scrollPane = scrollPane
+        return layout.rootPanel
     }
 
     private fun installDnDAction(list: JBList) {
