@@ -201,7 +201,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         installDnDAction(list)
         val scrollPane = ScrollPaneFactory.createScrollPane(list)
         val layout = ColorManagerToolWindowLayout()
-        layout.scrollPane = scrollPane
+        layout.rootPanel.add(scrollPane)
         return layout.rootPanel
     }
 
@@ -260,10 +260,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         group.add(FilterAction())
         group.add(SortAscAction())
         val actionToolBar = ActionManager.getInstance().createActionToolbar("ColorManager", group, true)
-        val simplePanel = JBUI.Panels.simplePanel(actionToolBar.component)
-        val toolBar = ColorManagerToolBar()
-        toolBar.buttonPanel = simplePanel
-        return toolBar.rootPanel
+        return JBUI.Panels.simplePanel(actionToolBar.component)
     }
 
     override fun dispose() {
