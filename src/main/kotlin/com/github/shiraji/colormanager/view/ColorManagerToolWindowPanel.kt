@@ -93,8 +93,15 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 } else {
                     cell.rootPanel.background = backgroundColor
                     cell.colorCodeLabel.text = colorManagerColorTag.colorCode ?: "???"
+                    val foregroundColor = if (isColorDark(backgroundColor)) Color.WHITE else Color.BLACK
+                    cell.colorNameLabel.foreground = foregroundColor
+                    cell.colorCodeLabel.foreground = foregroundColor
                 }
             }
+
+            // luma is calculated with the formula Y′ = 0.299 R′ + 0.587 G′ + 0.114 B′.
+            // https://en.wikipedia.org/wiki/Luma_%28video%29
+            private fun isColorDark(color: Color) = 1 - ( 0.299 * color.red + 0.587 * color.green + 0.114 * color.blue) / 255 >= 0.5
 
             private fun setFileName(cell: ColorManagerToolWindowCell, colorManagerColorTag: ColorManagerColorTag) {
                 val fileName = colorManagerColorTag.fileName
