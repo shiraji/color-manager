@@ -1,3 +1,7 @@
+### [ver 1.1.4](https://github.com/shiraji/color-manager/releases/tag/1.1.4)
+
+* Change label color to white or black according to darkness of the background #41
+
 ### [ver 1.1.3](https://github.com/shiraji/color-manager/releases/tag/1.1.3)
 
 * Fix java.lang.ArrayIndexOutOfBoundsException: -1 #38
