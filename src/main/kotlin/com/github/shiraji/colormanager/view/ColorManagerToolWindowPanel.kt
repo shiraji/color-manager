@@ -96,6 +96,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                     val foregroundColor = if (isColorDark(backgroundColor)) Color.WHITE else Color.BLACK
                     cell.colorNameLabel.foreground = foregroundColor
                     cell.colorCodeLabel.foreground = foregroundColor
+                    cell.fileNameLabel.foreground = foregroundColor
                 }
             }
 
