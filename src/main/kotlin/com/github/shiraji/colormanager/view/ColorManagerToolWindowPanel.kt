@@ -1,5 +1,6 @@
 package com.github.shiraji.colormanager.view
 
+import com.github.shiraji.colormanager.data.ColorManagerCell
 import com.github.shiraji.colormanager.data.ColorManagerColorTag
 import com.intellij.icons.AllIcons
 import com.intellij.ide.dnd.DnDDragStartBean
@@ -39,7 +40,7 @@ import javax.swing.*
 
 class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(true, true), DataProvider, Disposable {
 
-    val listModel: DefaultListModel<String> = DefaultListModel()
+    val listModel: DefaultListModel<ColorManagerCell> = DefaultListModel()
 
     val colorMap: MutableMap<String, ColorManagerColorTag> = linkedMapOf()
 
@@ -64,7 +65,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         list.cellRenderer = object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val cell = ColorManagerToolWindowCell()
-                val colorName = list?.model?.getElementAt(index) as? String ?: return cell.rootPanel
+                val element = list?.model?.getElementAt(index) as? ColorManagerCell ?: return cell.rootPanel
+                val colorName = element.colorName
                 cell.colorNameLabel.text = colorName
                 setColor(cell, colorName)
                 cell.rootPanel.border =
@@ -129,12 +131,12 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
             }
 
             private fun handleDoubleClick() {
-                val selectedColor = listModel.get(list.minSelectionIndex)
+                val selectedColor = listModel.get(list.minSelectionIndex).colorName
                 (colorMap[selectedColor]?.tag as? XmlTagImpl)?.navigate(true) ?: return
             }
 
             private fun handleRightClick(e: MouseEvent) {
-                val selectedColor = listModel.get(list.minSelectionIndex)
+                val selectedColor = listModel.get(list.minSelectionIndex).colorName
                 val copyMenu = JMenuItem("Copy $selectedColor").apply {
                     addActionListener {
                         CopyPasteManager.getInstance().setContents(TextTransferable(selectedColor))
@@ -218,7 +220,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                 if (file.fileType == XmlFileType.INSTANCE) {
                     DnDDragStartBean(StringSelection(getNameForXml(list)))
                 } else {
-                    DnDDragStartBean(StringSelection(listModel.get(list.minSelectionIndex)))
+                    DnDDragStartBean(StringSelection(listModel.get(list.minSelectionIndex).colorName))
                 }
             } else {
                 null
@@ -230,7 +232,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
                     if (file.fileType == XmlFileType.INSTANCE) {
                         JLabel(getNameForXml(list))
                     } else {
-                        JLabel(listModel.get(list.minSelectionIndex))
+                        JLabel(listModel.get(list.minSelectionIndex).colorName)
                     }
             label.isOpaque = true
             label.size = label.preferredSize
@@ -244,7 +246,7 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
     }
 
     private fun getNameForXml(list: JBList): String? {
-        val selectedColor = listModel.get(list.minSelectionIndex)
+        val selectedColor = listModel.get(list.minSelectionIndex).colorName
         val colorInfo = colorMap[selectedColor] ?: return null
         val tag = colorInfo.tag
         return "${getXmlColorPrefix(colorInfo.isInAndroidSdk)}/${tag.getAttribute("name")?.value}"
@@ -356,7 +358,8 @@ class ColorManagerToolWindowPanel(val project: Project) : SimpleToolWindowPanel(
         listModel.removeAllElements()
         val keys = if (sortAsc) colorMap.keys.sorted() else colorMap.keys
         keys.forEach {
-            listModel.addElement(it)
+            val element = ColorManagerCell(it, colorMap[it]?.colorCode ?: "")
+            listModel.addElement(element)
         }
     }
 
