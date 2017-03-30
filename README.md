@@ -60,6 +60,9 @@ Just start typing after focusing tool window
 
 ![search](website/images/search.png)
 
+The plugin let it finds them by typing a color name and a color code.
+
+![search_color_code](website/images/search_color_code.png)
 
 ## Show all colors
 
