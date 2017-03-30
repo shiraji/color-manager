@@ -5,7 +5,48 @@
     <vendor email="isogai.shiraji@gmail.com" url="http://github.com/shiraji">Shiraji</vendor>
 
     <description><![CDATA[
-    The plugin that manages Android colors. It makes easy to browse colors.
+<p>The plugin that manages Android colors. This plugin create a tool windows. </p>
+<p>Open &quot;Color Manager&quot; tool window. You will see all colors listed</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/normal.png" alt="normal"></p>
+<h2 id="drag-and-drop">Drag and Drop</h2>
+<p>From v1.1.0, this plugin support drag and drop feature.</p>
+<ul>
+<li>Select a file where you want to drop</li>
+<li>Drag the color panel</li>
+<li>Drop where you want to copy the color name/tag</li>
+</ul>
+<p>If the selected file is not xml file, then the drop text format is <code>R.color.color_name</code></p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/dnd.gif" alt="dnd"></p>
+<p>If the selected file is xml, then the drop text format is <code>@color/color_name</code></p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/dndxml.gif" alt="dndxml"></p>
+<p>At this moment, there is no way to detect drop target file&#39;s type. So, if you select a xml file and drop text to a Java file, this plugin pastes <code>@color/color_name</code> not <code>R.color.color_name</code></p>
+<h2 id="copy">Copy</h2>
+<p>Right click a color listed on the tool window</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/right_click.png" alt="right_click"></p>
+<p>Click &quot;Copy R.color.whatever_color_name&quot; or &quot;Copy @color/whatever_color_name&quot;</p>
+<p>You can also copy color name (&quot;R.color.whatever_color_name&quot; style) by cmd+c (or ctrl+c) after selecting the color panel</p>
+<h2 id="move-to-the-color-definition">Move to the color definition</h2>
+<p>Same as Copy. Right click and click &quot;Go to R.color.whatever_color_name&quot;</p>
+<p>Or just double click an item</p>
+<h2 id="edit-the-color-code">Edit the color code</h2>
+<p>Click &quot;Edit R.color.whatever_color_name&quot; and choose new color</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/edit.gif" alt="edit"></p>
+<h2 id="delete-a-color">Delete a color</h2>
+<p>Same as Copy and move. Right click and click &quot;Delete R.color.whatever_color_name&quot;</p>
+<p>It will show confirmation dialog before deleting the color tag.</p>
+<h2 id="search">Search</h2>
+<p>Just start typing after focusing tool window</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/search.png" alt="search"></p>
+<h2 id="show-all-colors">Show all colors</h2>
+<p>As default, this plugin filter library&#39;s color because there are a lot.</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/filter.png" alt="filter"></p>
+<p>You can un-filter those by clicking &quot;Filter&quot; icon (It takes a few second to show all colors)</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/no_filter.png" alt="no_filter"></p>
+<h2 id="sort-by-color-name">Sort by color name</h2>
+<p>You can sort by color name by clicking sort icon</p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/no_sort.png" alt="no_sort"></p>
+<p><img src="https://github.com/shiraji/color-manager/raw/master/website/images/sort.png" alt="sort"></p>
+
     ]]></description>
 
     <change-notes><![CDATA[
